@@ -24,6 +24,7 @@ func MakeWebHandler() http.Handler {
 	mux.HandleFunc("/students", GetStudentListHandler).Methods("GET")
 	mux.HandleFunc("/students/{id:[0-9]+}", GetStudentHandler).Methods("GET")
 	mux.HandleFunc("/students", PostStudentHandler).Methods("GET")
+	mux.HandleFunc("/students/{id:[0-9]+}", DeleteStudentHandler).Methods("DELETE")
 
 	students = make(map[int]Student)
 	students[1] = Student{1, "aaa", 16, 87}
@@ -82,6 +83,19 @@ func PostStudentHandler(w http.ResponseWriter, r *http.Request) {
 	student.Id = lastId // id를 증가시킨 후 앱에 등록
 	students[lastId] = student
 	w.WriteHeader(http.StatusCreated)
+}
+
+func DeleteStudentHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r) // id를 가져옵니다.
+	id, _ := strconv.Atoi(vars["id"])
+	_, ok := students[id]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		// id에 해당하는 학생이 없으면 에러
+		return
+	}
+	delete(students, id)
+	w.WriteHeader(http.StatusOK) // statusOK 반환
 }
 
 func main() {
