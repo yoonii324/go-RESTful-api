@@ -23,6 +23,7 @@ func MakeWebHandler() http.Handler {
 	mux := mux.NewRouter()
 	mux.HandleFunc("/students", GetStudentListHandler).Methods("GET")
 	mux.HandleFunc("/students/{id:[0-9]+}", GetStudentHandler).Methods("GET")
+	mux.HandleFunc("/students", PostStudentHandler).Methods("GET")
 
 	students = make(map[int]Student)
 	students[1] = Student{1, "aaa", 16, 87}
@@ -67,6 +68,20 @@ func GetStudentHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(student)
+}
+
+func PostStudentHandler(w http.ResponseWriter, r *http.Request) {
+	var student Student
+	err := json.NewDecoder(r.Body).Decode(&student) // JSON 데이터 반환
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	lastId++
+	student.Id = lastId // id를 증가시킨 후 앱에 등록
+	students[lastId] = student
+	w.WriteHeader(http.StatusCreated)
 }
 
 func main() {
